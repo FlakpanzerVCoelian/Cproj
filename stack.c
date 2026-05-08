@@ -5,6 +5,10 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdint.h>
+#include <sys/mman.h>
+
+
 #include "strutture.h"
 #include "checks.h"
 
@@ -84,7 +88,22 @@ elem* pop(elem* cima) { //poppo l'elemento in cima
 
     if (tmp->ogg != NULL) {
         if (tmp->ogg->refcount <= 1) { //se minore o uguale a 1, elimino (libero) i dati
-            if (tmp->ogg->v != NULL) free(tmp->ogg->v);
+            if (tmp->ogg->sudisco != NULL) { //toglie l'mmap
+                //printf("pop sudeisco \n"); fflush(stdout); //debug
+                int fd = open(tmp->ogg->path, O_RDONLY);
+                if (!fd) {
+                    printf("Errore chiusura mmap (ERRORE FATALE)\n");
+                    exit(1);
+                }
+                off_t grandezzafile = lseek(fd, 0, SEEK_END);
+                munmap(tmp->ogg->sudisco, grandezzafile);
+            }
+            if (tmp->ogg->v != NULL) { 
+                //printf("free vettore\n"); fflush(stdout); //debug
+                free(tmp->ogg->v);}
+            if (tmp->ogg->path != NULL) {
+                //printf("free filepath\n"); fflush(stdout); //debug
+                free(tmp->ogg->path); }
             free(tmp->ogg);
         } else {
 
@@ -122,7 +141,7 @@ elem* swap(elem* cima) { // scambia quello in cima con quello sotto
 
 void stampa_corrente(elem* corrente) {
     if (corrente->ogg->tipo == filepath) {
-            printf("Oggetto salvato in un file; Path: %s", corrente->ogg->path);
+            printf("Oggetto salvato in un file; Path: %s\n", corrente->ogg->path);
         }
     else if (corrente->ogg->altezza * corrente->ogg->lunghezza < 150){
         if (corrente->ogg->altezza == 1) {
@@ -139,13 +158,13 @@ void stampa_corrente(elem* corrente) {
                     for (int j = 0; j < corrente->ogg->lunghezza; j++) {
                         printf("%f ", corrente->ogg->v[(i*corrente->ogg->lunghezza) + j ]);
                     }
-                    printf("] ");
+                    printf("]\n");
                 }
                 printf("]\n");
         }
     }
     else {
-            printf("Oggetto con lunghezza %d ed altezza %d (molto grande)", corrente->ogg->lunghezza, corrente->ogg->lunghezza);
+            printf("Oggetto con lunghezza %d ed altezza %d (molto grande)\n", corrente->ogg->lunghezza, corrente->ogg->altezza);
     }
 }
 

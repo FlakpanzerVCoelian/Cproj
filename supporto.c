@@ -11,6 +11,45 @@
 
 #include "strutture.h"
 
+el* inizializza_oggetto(int altezza, int lunghezza, float* vett, char* path, int tipo, uint8_t *sudisco) {
+    el* ogg = calloc(1, sizeof(el)); //calloc inizializza a 0 per evitare eventuali infortuni
+    if (altezza != 0) ogg->altezza = altezza;
+    if (lunghezza != 0) ogg->lunghezza = lunghezza;
+    ogg->refcount = 1;
+    if (vett != NULL) ogg->v = vett;
+    else ogg->v = NULL;
+    if (path != NULL) ogg->path = path;
+    else ogg->path = NULL;
+    if (sudisco != NULL) ogg->sudisco = sudisco;
+    else ogg->sudisco = NULL;
+    if (tipo == numerico && (altezza == 0 || lunghezza == 0 || vett == NULL)) {
+        printf("Impossibile inizializzare un vettore numerico senza numeri (errore) \n");
+        exit(1);
+    } else if (tipo == floatbinario && (altezza == 0 || lunghezza == 0 || vett == NULL)) {
+        printf("Impossibile inizializzare un vettore binario senza numeri (errore) \n");
+        exit(1);
+    } else if (tipo == filepath && path == NULL) {
+        printf("Impossibile inizializzare un filepath senza filepath (errore)\n");
+        exit(1);
+    }
+    ogg->tipo = tipo;
+    return ogg;
+}
+
+void saltaPGMcommenti(FILE *fp) {
+    int ch;
+    while ((ch = fgetc(fp)) != EOF) {
+        if (isspace(ch)) {
+            continue; // salta spazi
+        } else if (ch == '#') {
+            while ((ch = fgetc(fp)) != '\n' && ch != EOF); //commento, skippa fino alla fine della linea
+        } else {
+            ungetc(ch, fp); //non e` uno spazio ne un commento, e` un informazione
+            break;
+        }
+    }
+}
+
 int numSIoNO(char *x) {  //per un carattere mi dice se e` un numero, un . o qualcos'altro
     if (isdigit(*x)) {
         return 1;
@@ -24,7 +63,7 @@ int numSIoNO(char *x) {  //per un carattere mi dice se e` un numero, un . o qual
 }
 
 
-void leggitensore(FILE* fd, el* ogg) { 
+int leggitensore(FILE* fd, el* ogg) { 
     char* buffer = malloc(sizeof(char) * BUFLEN);
     int sizeINIT = 10; //scelta arbitraria
     ogg->altezza = 1; //SEMPRE 1 QUANDO LEGGO
@@ -42,7 +81,6 @@ void leggitensore(FILE* fd, el* ogg) {
         if (strcmp(buffer, "]") == 0) { //fine tensore (termina ciclo)
             break;
         }
-        
         float numeroTROVATO = strtof(buffer, NULL); //str->float
         if (numeroTROVATO != 0.0f && numeroTROVATO != 1.0f) fb = numerico   ;
         if (ogg->lunghezza >= sizeINIT) {
@@ -69,6 +107,8 @@ void leggitensore(FILE* fd, el* ogg) {
     }
 
     ogg->v = vettoreDEF;
+    ogg->path = NULL;
+    ogg->sudisco = NULL;
     
     printf("Trovato un vettore!! Altezza: %d, Lunghezza: %d\n", ogg->altezza, ogg->lunghezza); // debug
 

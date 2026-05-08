@@ -1,5 +1,7 @@
 #ifndef _STRUTTTURE_H
 #define _STRUTTTURE_H
+#include <stdint.h> 
+
 
 #define BUFLEN 256
 
@@ -8,8 +10,9 @@ typedef struct el {
     int lunghezza; //N, Num. colonne in una matrice MxN
     int altezza; //M, 1 se 1D
     float *v;
-    char path[128];
+    char *path;
     int refcount;
+    uint8_t *sudisco;
 } el;
 
 typedef struct ele {

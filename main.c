@@ -43,12 +43,28 @@ int main(int argc, char * argv[]){
             ogg->altezza = 1; //giusto per inizializzare
             ogg->lunghezza = 1;
             ogg->tipo = leggitensore(fd, ogg);
-            
+            ogg->path = NULL;
+            ogg->sudisco = NULL;
 
-
-        } else if (buffer[0] == '"') { //trovato un filepath 
-            //da finire 
-        } else { //sara` un operando o un \ (che ignoro)
+        } else if (buffer[0] == '"') { //trovato un filepath
+            printf("Trovato un filepath\n");
+            el* ogg = malloc(sizeof(el));
+            cima = push(cima, ogg);
+            ogg->tipo = filepath;
+            size_t lungh = strlen(buffer);
+            char* path = malloc(sizeof(char) * (lungh - 1)); //strlen ritorna fino a prima del null terminator, percio mi serve uno in piu e due in meno per le apici
+            if (lungh > 2 && buffer[0] == '"' && buffer [lungh-1] == '"') {
+                strncpy(path, buffer + 1, lungh - 2);
+                path[lungh-2] = '\0'; //aggiunta del null terminator
+            } 
+            else {
+                printf("Filepath letto invalido (errore)\n");
+                exit(1);
+            }
+            ogg->path = path;
+            ogg->v = NULL;
+            ogg->sudisco = NULL;
+        } else { //sara` un operando
             cima = determina_operando(buffer, cima);
         }
     }
