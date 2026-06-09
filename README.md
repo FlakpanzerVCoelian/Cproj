@@ -1,6 +1,6 @@
 Progetto di C
 
-28 aprile 2026 - 7 maggio 2026 - 09 06 2026
+28 aprile 2026 - 07 maggio 2026 - 09 giugno 2026
 <br>inizio - versione penultima - versione definitiva
 
 Nel repository è presente la versione penultima, che implementa lo stack con le linked liste doppie
